@@ -15,62 +15,23 @@ public class Sort {
             pointer++;
         }
         if(args[pointer].equals("-i")) {
-            ArrayList<Integer> firstUnsortArray = new ArrayList<>();
-            ArrayList<Integer> secondUnsortArray = new ArrayList<>();
-            for (int i = pointer+2; i < args.length; i++) {
-                try (Scanner scan = new Scanner(new FileReader(args[i]))) {
-                    while (scan.hasNextLine()) {
-                        String unit = scan.nextLine();
-                        if(!unit.contains(" ") && isNumeric(unit)) {
-                            secondUnsortArray.add(parseInt(unit));
-                        }
-                    }
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-                firstUnsortArray = merge(firstUnsortArray, secondUnsortArray, mode);
-                secondUnsortArray.clear();
+            ArrayList<Integer> arrayToSort = new ArrayList<>();
+            ArrayList<String> tempArray;
+            for (int i = pointer + 2; i < args.length; i++) {
+                tempArray = fileRead(args[i]);
+                arrayToSort = merge(arrayToSort, srtArrayToInt(tempArray), mode);
             }
-            firstUnsortArray = msort(firstUnsortArray, mode);
-            try (FileWriter writer = new FileWriter(args[pointer+1], true)) {
-                for(int i = 0; i < firstUnsortArray.size(); i++) {
-                    if(i+1 < firstUnsortArray.size()) {
-                        writer.append(firstUnsortArray.get(i).toString());
-                        writer.append('\n');
-                    } else {
-                        writer.append(firstUnsortArray.get(i).toString());
-                    }
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            arrayToSort = msort(arrayToSort, mode);
+            fileWrite(intArrayToSrt(arrayToSort), args[pointer+1]);
         } else if (args[pointer].equals("-s")) {
-            ArrayList<String> firstUnsortArray = new ArrayList<>();
-            ArrayList<String> secondUnsortArray = new ArrayList<>();
-            for (int i = pointer+2; i < args.length; i++) {
-                try (Scanner scan = new Scanner(new FileReader(args[i]))) {
-                    while (scan.hasNextLine()) {
-                        secondUnsortArray.add(scan.nextLine());
-                    }
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-                firstUnsortArray = mergeStr(firstUnsortArray, secondUnsortArray, mode);
-                secondUnsortArray.clear();
+            ArrayList<String> arrayToSort = new ArrayList<>();
+            ArrayList<String> tempArray;
+            for(int i = pointer + 2; i < args.length; i++) {
+                tempArray = fileRead(args[i]);
+                arrayToSort = mergeStr(arrayToSort, tempArray, mode);
             }
-            firstUnsortArray = msortStr(firstUnsortArray, mode);
-            try (FileWriter writer = new FileWriter(args[pointer+1], true)) {
-                for(int i = 0; i < firstUnsortArray.size(); i++) {
-                    if(i+1 < firstUnsortArray.size()) {
-                        writer.append(firstUnsortArray.get(i));
-                        writer.append('\n');
-                    } else {
-                        writer.append(firstUnsortArray.get(i));
-                    }
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            arrayToSort = msortStr(arrayToSort, mode);
+            fileWrite(arrayToSort, args[pointer+1]);
         } else {
             System.out.println("Введены некорректные параметры");
         }
@@ -191,13 +152,54 @@ public class Sort {
         return res;
     }
 
-    public static boolean isNumeric(String str) {
-        try {
-            Integer.parseInt(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
+    public static ArrayList<Integer> srtArrayToInt(ArrayList<String> str) {
+        ArrayList<Integer> res = new ArrayList<>();
+        for (String s : str) {
+            try {
+                res.add(Integer.parseInt(s));
+            } catch (NumberFormatException ignored) {
+
+            }
         }
+        return res;
     }
 
+    public static ArrayList<String> intArrayToSrt(ArrayList<Integer> str) {
+        ArrayList<String> res = new ArrayList<>();
+        for (int i : str) {
+            try {
+                res.add(Integer.toString(i));
+            } catch (NumberFormatException ignored) {
+
+            }
+        }
+        return res;
     }
+
+    public static ArrayList<String> fileRead(String fileName) {
+        ArrayList<String> res = new ArrayList<>();
+            try (Scanner scan = new Scanner(new FileReader(fileName))) {
+                while (scan.hasNextLine()) {
+                    res.add(scan.nextLine());
+                }
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        return res;
+    }
+
+    public static void fileWrite(ArrayList<String> dataToWrite, String fileName) {
+        try (FileWriter writer = new FileWriter(fileName, true)) {
+            for(int i = 0; i < dataToWrite.size(); i++) {
+                if(i+1 < dataToWrite.size()) {
+                    writer.append(dataToWrite.get(i));
+                    writer.append('\n');
+                } else {
+                    writer.append(dataToWrite.get(i));
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
